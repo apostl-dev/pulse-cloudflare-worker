@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "apostl-pulse",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-29",
+  "workers_dev": true,
+  "secrets": {
+    "required": ["APOSTL_PULSE_API_KEY"]
+  },
+  "vars": {
+    "APOSTL_PULSE_ENDPOINT": "https://ingest.apostl.dev",
+    "APOSTL_PULSE_ENVIRONMENT": "production"
+  },
+  "observability": {
+    "enabled": true
+  }
+}

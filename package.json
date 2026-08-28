@@ -1,0 +1,51 @@
+{
+  "name": "@apostl-dev/pulse-cloudflare-worker",
+  "version": "0.1.0",
+  "description": "Server-side analytics for every request through Cloudflare, delivered to Apostl Pulse",
+  "license": "MIT",
+  "author": "Apostl <hello@apostl.dev>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/apostl-dev/pulse-cloudflare-worker.git"
+  },
+  "homepage": "https://platform.apostl.dev",
+  "bugs": "https://github.com/apostl-dev/pulse-cloudflare-worker/issues",
+  "keywords": [
+    "ai-agents",
+    "analytics",
+    "cloudflare-workers",
+    "server-side",
+    "observability"
+  ],
+  "cloudflare": {
+    "bindings": {
+      "APOSTL_PULSE_API_KEY": {
+        "description": "Your server-side Apostl Pulse API key. Create one at https://platform.apostl.dev and never expose it to browser code or source control."
+      }
+    }
+  },
+  "type": "module",
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE",
+    "wrangler.jsonc"
+  ],
+  "scripts": {
+    "build": "wrangler deploy --dry-run --outdir dist",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test test/*.test.ts",
+    "check": "npm test && npm run typecheck && npm run build",
+    "prepack": "npm run check"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260828.1",
+    "@types/node": "^26.4.0",
+    "tsx": "^4.23.12",
+    "typescript": "^7.0.2",
+    "wrangler": "^4.127.1"
+  }
+}
