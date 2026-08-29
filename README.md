@@ -20,19 +20,68 @@ background. No browser JavaScript and no application middleware are required.
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/apostl-dev/pulse-cloudflare-worker)
 
+## Choose the collector before deployment
+
+Use this Worker only for a confirmed Cloudflare-proxied hostname when you can attach or edit the matching Worker route. Confirm the exact hostname in the
+Cloudflare control plane when possible; Cloudflare nameservers alone do not
+prove that its DNS record is proxied. A trusted live edge signal such as
+`CF-Ray` can support the decision when route authority is also available.
+
+- For an existing origin behind Cloudflare, deploy this Worker on the narrowest
+  matching route. Do not use a Worker Custom Domain that points back to the
+  existing hostname; that can bypass the origin or create a loop.
+- If the hostname is already served by a Cloudflare Worker or Pages app,
+  integrate this template's observation logic into that controlled edge runtime
+  or use an explicitly supported non-looping route. Do not stack a second
+  Worker in front blindly.
+- For an ordinary supported server that is not routed through Cloudflare, use
+  [`@apostl-dev/pulse-sdk`](https://github.com/apostl-dev/pulse-sdk) in the
+  existing server instead.
+- If the record is DNS-only, the hostname is unreachable, Cloudflare status is
+  ambiguous, or route/source authority is missing, stop and obtain that fact or
+  permission. Do not guess, substitute another hostname, or silently choose a
+  collector.
+
+Exactly one Pulse collector may own a request path. Do not run this Worker and
+the server SDK on the same hostname and route unless the owner has explicitly
+authorized a measured migration with deduplication proof.
+
+The canonical public
+[`agent-traffic-analytics` skill](https://github.com/apostl-dev/apostl-skills/tree/main/skills/agent-traffic-analytics)
+contains the complete route-selection, setup, verification, and claim workflow.
+Its public files can be read directly; a global skill install is not required.
+
 ## One-line install
 
 Give this copy-paste instruction to your AI agent:
 
 ```sh
-Install Apostl Pulse for Cloudflare from https://github.com/apostl-dev/pulse-cloudflare-worker.
-
-Create or retrieve a server-side Pulse API key, deploy the Worker on the Cloudflare route for this domain, store the key as APOSTL_PULSE_API_KEY using a Worker secret, verify one real public request, and return evidence from both Cloudflare and Pulse. Never put the API key in source control, browser code, logs, or chat output.
+Set up Apostl Pulse by following the public agent-traffic-analytics skill at https://github.com/apostl-dev/apostl-skills/tree/main/skills/agent-traffic-analytics and the canonical Auth.md instructions at https://apostl.dev/auth.md. Inspect the exact hostname and deployment authority first. Use https://github.com/apostl-dev/pulse-cloudflare-worker only when that hostname is confirmed Cloudflare-proxied and you can attach a narrow, non-looping route; otherwise use https://github.com/apostl-dev/pulse-sdk in the supported origin server, or stop with the missing fact or permission. Deploy exactly one collector for each request path. Obtain the key through the skill's accountless setup helper, transfer it directly from its owner-only credentials file into the server-side secret APOSTL_PULSE_API_KEY, prove one genuine public event in Cloudflare and Pulse, and never print or return any raw credential.
 ```
 
-You need a Pulse API key. Your agent can register the installation and obtain
-one. If you prefer an old-school flow, create it at
-[platform.apostl.dev](https://platform.apostl.dev).
+## Obtain a key safely without an account
+
+You need a Pulse API key, but a human account is not required for initial
+setup. Have your agent follow the public skill's **Start through Auth.md without
+an account** flow and the canonical [`Auth.md`](https://apostl.dev/auth.md)
+instructions. That flow validates the live discovery metadata before mutation,
+registers an unclaimed installation for the authorized origin, and writes its
+one-time credentials to an owner-only `0600` file.
+
+The agent should transfer the saved `api_key` directly from that file into
+Wrangler's secret prompt or authorized Cloudflare secret tooling. Do not use an
+ad hoc credential `curl` command whose JSON response goes to stdout. Never
+print, log, paste into chat, commit, or return the raw API key, setup token,
+claim capability, identity assertion, or access token. If the agent cannot move
+the key from local protected storage into the Worker secret without exposing
+it, stop and ask for a safe secret-runtime path rather than asking the owner to
+paste it into chat.
+
+The owner claims the verified installation afterward using the non-secret
+verification URI and short-lived user code produced by the skill. If you prefer
+a browser-first flow, create the project at
+[platform.apostl.dev](https://platform.apostl.dev) and still enter its API key
+only through secret tooling.
 
 ## Copy-paste quickstart
 
@@ -47,7 +96,8 @@ npx wrangler secret put APOSTL_PULSE_API_KEY
 npx wrangler deploy --route 'example.com/*'
 ```
 
-Enter the Pulse API key only in Wrangler's secret prompt. Replace
+Enter the Pulse API key only in Wrangler's secret prompt; do not include it in
+the command itself. Replace
 `example.com/*` with the smallest route that should be observed. The default
 ingest endpoint is `https://ingest.apostl.dev` and the default environment is
 `production`.
