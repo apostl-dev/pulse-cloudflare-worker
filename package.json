@@ -39,7 +39,7 @@
     "prepack": "npm run check"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260828.1",

@@ -173,6 +173,8 @@ own classifier without redeploying customer Workers.
 
 ## Local development
 
+Node.js 22 or newer is required by the current Wrangler release.
+
 Install dependencies and run the full proof suite:
 
 ```sh
